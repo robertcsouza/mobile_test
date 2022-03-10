@@ -1,10 +1,10 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile_test/config/Routes.dart';
 import 'package:mobile_test/controller/CharacterController.dart';
 import 'package:mobile_test/models/Character.dart';
 import 'package:mobile_test/models/Info.dart';
 import 'package:mobile_test/models/allCharacters.dart';
+import 'package:mobile_test/screens/CharacterDetail.dart';
 
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -16,8 +16,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: '/',
-      routes: routes(),
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -37,27 +35,51 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List _characters = [];
-  int _page = 1;
-  List<String> _types = ['name', 'status', 'species'];
-  String _type = 'name';
-  late Info _info;
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
   CharacterController _controller = CharacterController();
   TextEditingController _searchController = TextEditingController();
-  late Future _futureCharacter;
-  void _onRefresh() async {
-    await Future.delayed(Duration(milliseconds: 1000));
 
-    if (_info.next != null) {
-      setState(() {
-        _futureCharacter = _controller.getAllCharacters(next: _info.next);
-        _page++;
-      });
-    }
+  List _characters = [];
+  List<String> _types = ['name', 'status', 'species'];
+  late Info _info;
+  late Future _futureCharacter;
+  int _page = 1;
+  String _type = 'name';
+
+  void _onRefresh() async {
+    Future.delayed(Duration(seconds: 1));
+    setState(() {
+      _futureCharacter = _controller.getAllCharacters();
+    });
 
     _refreshController.refreshCompleted();
+  }
+
+  _prev() {
+    if (_info.prev != null) {
+      setState(() {
+        _futureCharacter = _controller.getAllCharacters(url: _info.prev);
+        _page++;
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Não há mais páginas para voltar"),
+      ));
+    }
+  }
+
+  _next() {
+    if (_info.next != null) {
+      setState(() {
+        _futureCharacter = _controller.getAllCharacters(url: _info.next);
+        _page++;
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Não há mais páginas para avançar"),
+      ));
+    }
   }
 
   void _onLoading() async {
@@ -74,9 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-
     _futureCharacter = _controller.getAllCharacters();
   }
 
@@ -84,6 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          centerTitle: true,
           backgroundColor: Colors.grey.shade900,
           title: Text(widget.title),
         ),
@@ -125,10 +146,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: [
                   _header(),
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child:
-                        Text('Page ${_page} Arraste para baixo pra recarregar'),
-                  ),
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: _pagination()),
                   _listCharcters(characters: snapshot.data.results),
                 ],
               );
@@ -145,11 +164,12 @@ class _MyHomePageState extends State<MyHomePage> {
             padding: const EdgeInsets.all(8.0),
             child: Container(
                 width: MediaQuery.of(context).size.width * 0.60,
-                height: 50,
+                height: 40,
                 decoration: BoxDecoration(
                     color: Colors.grey.shade400,
                     borderRadius: BorderRadius.all(Radius.circular(100))),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
                       child: TextField(
@@ -158,7 +178,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         decoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: 'Pesquisar',
-                          contentPadding: EdgeInsets.only(left: 16.0),
+                          contentPadding:
+                              EdgeInsets.only(left: 16.0, bottom: 8),
                         ),
                       ),
                     ),
@@ -175,25 +196,82 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           Expanded(
               child: Container(
-            height: 50,
+            height: 40,
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(100)),
                 color: Colors.grey.shade400),
-            child: DropdownSearch<String>(
-                mode: Mode.MENU,
-                items: _types,
-                dropdownSearchDecoration: InputDecoration(
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.only(left: 16.0)),
-                onChanged: (selectedItem) {
-                  setState(() {
-                    _type = selectedItem!;
-                  });
-                },
-                selectedItem: _type),
+            child: Center(
+              child: DropdownSearch<String>(
+                  mode: Mode.MENU,
+                  items: _types,
+                  dropdownSearchDecoration: InputDecoration(
+                      border: InputBorder.none,
+                      contentPadding:
+                          const EdgeInsets.only(left: 16.0, bottom: 8)),
+                  onChanged: (selectedItem) {
+                    setState(() {
+                      _type = selectedItem!;
+                    });
+                  },
+                  selectedItem: _type),
+            ),
           ))
         ],
       ),
+    );
+  }
+
+  Widget _pagination() {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0),
+          child: TextButton(
+            onPressed: _prev,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.arrow_back_ios,
+                  color: Colors.grey.shade900,
+                  size: 24.0,
+                ),
+                Text(
+                  'Prev',
+                  style: TextStyle(color: Colors.grey.shade900, fontSize: 15),
+                ),
+                SizedBox(
+                  width: 5,
+                ),
+              ],
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 16.0),
+          child: TextButton(
+            onPressed: _next,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Next',
+                  style: TextStyle(color: Colors.grey.shade900, fontSize: 15),
+                ),
+                SizedBox(
+                  width: 5,
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.grey.shade900,
+                  size: 24.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ]),
     );
   }
 
@@ -224,8 +302,13 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Center(
         child: ListTile(
           onTap: () {
-            Navigator.pushNamed(context, '/character/detail',
-                arguments: _character);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => CharacterDetail(
+                        character: _character,
+                      )),
+            );
           },
           leading: ClipRRect(
               borderRadius: BorderRadius.all(Radius.circular(10)),
