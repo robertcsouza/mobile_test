@@ -15,6 +15,7 @@ class CharacterDetail extends StatefulWidget {
 class _CharacterDetailState extends State<CharacterDetail> {
   CharacterController _characterController = CharacterController();
   String _firstSeen = '';
+
   _getEpsode() async {
     Episode episode = await _characterController.epsode(
         epsodeUrl: widget.character.episode.first);
@@ -253,100 +254,3 @@ class _CharacterDetailState extends State<CharacterDetail> {
     );
   }
 }
-
-
-/*
-
-Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 20.0, bottom: 16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Flexible(
-                      child: new Container(
-                        width: 250,
-                        padding: new EdgeInsets.only(right: 13.0),
-                        child: new Text(
-                          _character.name,
-                          overflow: TextOverflow.ellipsis,
-                          style: new TextStyle(
-                            fontSize: 26.0,
-                            color: Colors.grey.shade900,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.circle,
-                          color: _character.status != 'Alive'
-                              ? Colors.red
-                              : Colors.green,
-                          size: 12,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            _character.status,
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 32.0, top: 16.0),
-                child: Text(
-                  'Last know Location',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 64.0, top: 8.0),
-                child: Text(_character.location.name),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 32.0, top: 16.0),
-                child: Text(
-                  'First seen in',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 64.0, top: 8.0),
-                child: Text(_firstSeen),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 32.0, top: 16.0),
-                child: Text(
-                  'Gender',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 64.0, top: 8.0),
-                child: Text(_character.gender),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 32.0, top: 16.0),
-                child: Text(
-                  'Origin',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 64.0, top: 8.0),
-                child: Text(_character.origin.name),
-              )
-            ],
-          )
-
- */
