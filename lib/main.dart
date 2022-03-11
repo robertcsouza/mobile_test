@@ -44,7 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String> _types = ['name', 'status', 'species'];
   late Info _info;
   late Future _futureCharacter;
-  int _page = 1;
+
   String _type = 'name';
 
   void _onRefresh() async {
@@ -60,7 +60,6 @@ class _MyHomePageState extends State<MyHomePage> {
     if (_info.prev != null) {
       setState(() {
         _futureCharacter = _controller.getAllCharacters(url: _info.prev);
-        _page++;
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -73,7 +72,6 @@ class _MyHomePageState extends State<MyHomePage> {
     if (_info.next != null) {
       setState(() {
         _futureCharacter = _controller.getAllCharacters(url: _info.next);
-        _page++;
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
